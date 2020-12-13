@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/travis/com/cabinet-cli/crawler-4chan?style=flat-square" alt="Build Status" />
   <img src="https://img.shields.io/codecov/c/github/cabinet-cli/crawler-4chan?style=flat-square" alt="Coverage" />
   <br />
-  <sup>4chan provider for cabinet CLI application</sup>
+  <sup>Cabinet CLI crawler implementation for 4chan</sup>
   <br />
   <br />
 </div>
