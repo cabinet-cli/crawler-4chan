@@ -1,6 +1,6 @@
 {
     "name": "@cabinet-cli/crawler-4chan",
-    "version": "0.0.0-development",
+    "version": "1.0.0",
     "description": "core implementation library for cabinet cli",
     "repository": "https://github.com/cabinet-cli/crawler-4chan",
     "author": "Sophia <beyondthesophia@gmail.com>",
