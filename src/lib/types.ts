@@ -145,43 +145,192 @@ export interface FourChanBoard {
     min_image_height: number;
 }
 
-export interface FourChanOPThread {
-    no: number;
-    resto: number;
-    sticky: number;
-    closed: number;
-    now: string;
-    time: number;
-    name: string;
-    trip: string;
-    id: string;
-    capcode: string;
-    country: string;
-    country_name: string;
-    sub: string;
-    com: string;
+export interface FourChanThreadAttachment {
+    /**
+     * Unix timestamp + microtime that an image was uploaded
+     */
     tim: number;
+
+    /**
+     * Filename as it appeared on the poster's device
+     */
     filename: string;
-    ext: string;
+
+    /**
+     * Filetype
+     */
+    ext: ".jpg" | ".png" | ".gif" | ".pdf" | ".swf" | ".webm";
+
+    /**
+     * Size of uploaded file in bytes
+     */
     fsize: number;
+
+    /**
+     * 24 character, packed base64 MD5 hash of file
+     */
     md5: string;
+
+    /**
+     * Image width dimension
+     */
     w: number;
+
+    /**
+     * Image height dimension
+     */
     h: number;
+
+    /**
+     * Thumbnail image width dimension
+     */
     tn_w: number;
+
+    /**
+     * Thumbnail image height dimension
+     */
     tn_h: number;
-    filedeleted: number;
-    spoiler: number;
-    custom_spoiler: number;
-    omitted_posts: number;
-    omitted_images: number;
-    replies: number;
-    images: number;
-    bumplimit: number;
-    imagelimit: number;
-    last_modified: number;
-    tag: string;
-    semantic_url: string;
-    since4pass: number;
-    unique_ips: number;
-    m_img: number;
+
+    /**
+     * If the file was deleted from the post
+     */
+    filedeleted?: 1;
+
+    /**
+     * If the image was spoilered or not
+     */
+    spoiler?: 1;
+
+    /**
+     * The custom spoiler ID for a spoilered image
+     */
+    custom_spoiler?: number;
 }
+
+export interface FourChanThread {
+    /**
+     * The numeric post ID
+     */
+    no: number;
+
+    /**
+     * For replies: this is the ID of the thread being replied to. For OP: this value is zero
+     */
+    resto: number;
+
+    /**
+     * MM/DD/YY(Day)HH:MM (:SS on some boards), EST/EDT timezone
+     */
+    now: string;
+
+    /**
+     * UNIX timestamp the post was created
+     */
+    time: number;
+
+    /**
+     * Name user posted with. Defaults to Anonymous
+     */
+    name: string;
+
+    /**
+     * The user's tripcode, in format: !tripcode or !!securetripcode
+     */
+    trip?: string;
+
+    /**
+     * The poster's ID
+     */
+    id?: string;
+
+    /**
+     * The capcode identifier for a post
+     */
+    capcode?: "mod" | "admin" | "admin_highlight" | "manager" | "developer" | "founder";
+
+    /**
+     * Poster's ISO 3166-1 alpha-2 country code
+     */
+    country?: string;
+
+    /**
+     * Poster's country name
+     */
+    country_name?: string;
+
+    /**
+     * Comment (HTML escaped)
+     */
+    com?: string;
+}
+
+export interface FourChanThreadOPItems {
+    /**
+     * If the thread is being pinned to the top of the page
+     */
+    sticky?: number;
+
+    /**
+     * If the thread is closed to replies
+     */
+    closed?: number;
+
+    /**
+     * OP Subject text
+     */
+    sub?: string;
+
+    /**
+     * Number of replies minus the number of previewed replies
+     */
+    omitted_posts: number;
+
+    /**
+     * Number of image replies minus the number of previewed image replies
+     */
+    omitted_images: number;
+
+    /**
+     * Total number of replies to a thread
+     */
+    replies: number;
+
+    /**
+     * Total number of image replies to a thread
+     */
+    images: number;
+
+    /**
+     * If a thread has reached bumplimit, it will no longer bump
+     */
+    bumplimit?: 1;
+
+    /**
+     * If an image has reached image limit, no more image replies can be made
+     */
+    imagelimit?: 1;
+
+    /**
+     * The UNIX timestamp marking the last time the thread was modified (post added/modified/deleted, thread closed/sticky settings modified)
+     */
+    last_modified: number;
+
+    /**
+     * The category of .swf upload
+     */
+    tag?: string;
+
+    /**
+     * SEO URL slug for thread
+     */
+    semantic_url: string;
+
+    /**
+     * Number of unique posters in a thread
+     */
+    unique_ips: number;
+}
+
+export type FourChanOPThread =
+    | (FourChanThread & FourChanThreadOPItems)
+    | (FourChanThread & FourChanThreadOPItems & FourChanThreadAttachment);

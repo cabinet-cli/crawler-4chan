@@ -4,9 +4,14 @@ import { Crawler, Node, RuleBase } from "@cabinet-cli/core";
 
 import { FourChanBoard, FourChanOPThread } from "./types";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface FourChanCrawlerKeyword {
+    title?: string;
+    content?: string;
+}
+
 interface FourChanCrawlerRule extends RuleBase {
     boards: string[];
+    keywords?: Array<string | FourChanCrawlerKeyword>;
 }
 
 export default class FourChanCrawler extends Crawler<FourChanCrawlerRule> {
@@ -26,7 +31,6 @@ export default class FourChanCrawler extends Crawler<FourChanCrawlerRule> {
             throw new Error(`Failed to fetch 4chan.org boards: ${e.message}`);
         }
     }
-
     public async getOPThreadsFromBoard(boardCode: string): Promise<FourChanOPThread[]> {
         try {
             const data = await this.fetcher.fetchJSON<[{ page: number; threads: FourChanOPThread[] }]>(
@@ -46,6 +50,19 @@ export default class FourChanCrawler extends Crawler<FourChanCrawlerRule> {
     public getRuleScheme(): yup.ObjectSchemaDefinition<Omit<FourChanCrawlerRule, "type">> {
         return {
             boards: yup.array<string>().of(yup.string().required()).required(),
+            keywords: yup.array<string | FourChanCrawlerKeyword>().of(
+                yup.lazy(value =>
+                    typeof value === "string"
+                        ? yup.string().required()
+                        : yup
+                              .object<FourChanCrawlerKeyword>()
+                              .shape<FourChanCrawlerKeyword>({
+                                  title: yup.string(),
+                                  content: yup.string(),
+                              })
+                              .required(),
+                ),
+            ),
         };
     }
 
@@ -59,12 +76,36 @@ export default class FourChanCrawler extends Crawler<FourChanCrawlerRule> {
             }
 
             const opThreads = await this.getOPThreadsFromBoard(targetBoard.board);
-            result.push(
-                ...opThreads.map(thread => ({
-                    title: thread.sub,
-                    content: thread.com,
-                })),
-            );
+            if (rule.keywords) {
+                const matchingThreads = [];
+                for (const thread of opThreads) {
+                    const matched = rule.keywords.some(keyword => {
+                        if (typeof keyword === "string" && thread.sub) {
+                            return thread.sub.indexOf(keyword) > 0;
+                        }
+
+                        if (typeof keyword === "string" && thread.com) {
+                            return thread.com.indexOf(keyword) > 0;
+                        }
+
+                        if (typeof keyword === "object") {
+                            if (keyword.title && thread.sub) {
+                                return thread.sub.indexOf(keyword.title) > 0;
+                            }
+
+                            if (keyword.content && thread.com) {
+                                return thread.com.indexOf(keyword.content) > 0;
+                            }
+                        }
+                    });
+
+                    if (!matched) {
+                        continue;
+                    }
+
+                    matchingThreads.push(thread);
+                }
+            }
         }
 
         return result;
