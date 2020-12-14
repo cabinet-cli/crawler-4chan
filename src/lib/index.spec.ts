@@ -56,10 +56,24 @@ describe("FourChanCrawler", () => {
         const crawler = new FourChanCrawler();
 
         await expect(
+            (async () => {
+                const threads = await crawler.run({
+                    type: "4chan",
+                    boards: ["wsg"],
+                });
+
+                return threads.length > 0;
+            })(),
+        ).resolves.toBe(true);
+    });
+
+    it("throws an error when given rule contains board not existing", async () => {
+        const crawler = new FourChanCrawler();
+        await expect(
             crawler.run({
                 type: "4chan",
-                boards: ["wsg"],
+                boards: ["boardcodethatshuldnotexist"],
             }),
-        ).resolves.toHaveLength(151);
+        ).rejects.toThrow();
     });
 });
